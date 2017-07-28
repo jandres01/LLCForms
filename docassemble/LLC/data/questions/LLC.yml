@@ -1,0 +1,208 @@
+---
+include:
+  - basic-questions.yml
+---
+mandatory: True
+question: |
+  All documentation complete.
+buttons:
+  - Finished: leave
+    url: https://www.gooddocs.io
+  - Start Over: restart
+attachments:
+  - name: Disclosure Statement
+    filename: LLC_${ organizer.name }
+    content file: 
+      #- LLCPacket.md
+      #- CertificateofFormation.md
+      #- EIN.md
+      #- AcceptanceofAppt.md
+      #- Minutes.md
+      # - UnanimousConsent.md
+      - test.md
+---
+objects:
+  - entity: Individual
+  - agent: Person
+  - officers : Individual
+  - organizer : Individual
+  - members: Person
+mandatory: True
+---
+generic object: Individual
+question: |
+  Each Company must have a primary representative. What is ${ x.object_possessive('name')}?
+fields:
+  - First Name: x.name.first
+    default: ${ x.first_name_hint() }
+  - Middle Name: x.name.middle
+    required: False
+  - Last Name: x.name.last
+    default: ${ x.last_name_hint() }
+  - Suffix: x.name.suffix
+    required: False
+    code: |
+      name_suffix()
+  - Title in Company: x.title
+  - Address: x.address.address
+  - City: x.address.city
+  - State: x.address.state
+    default: 
+      code: |
+        case.state
+    code: |
+      us.states.mapping('abbr', 'name')
+  - Zip: x.address.zip
+    required: False
+---
+generic object: Individual
+question: |
+  What is ${ x.object_possessive('information') }?
+subquestion: An issuer is the entity in which investors will be purchasing securities
+fields:
+  - Company Name: x.company
+  - E-mail: x.email
+    datatype: email
+  - Address: x.address.address
+  - City: x.address.city
+  - State: x.address.state
+    default: 
+      code: |
+        case.state
+    code: |
+      us.states.mapping('abbr', 'name')
+  - Zip: x.address.zip
+    required: False
+---
+generic object: Person
+question: |
+  Is the Registered Agent an organization or an individual resident of the state?
+fields:
+  - "Is the initial Registered Agent an organization?": x.question
+    datatype: yesnoradio
+  - Registered Agent Organization Name: x.org
+    show if:
+       variable: x.question
+       is: True
+  - Registered Agent First Name: x.name.first
+    show if:
+       variable: x.question
+       is: False
+  - Registered Agent Middle Name: x.name.middle
+    required: False
+    show if:
+       variable: x.question
+       is: False
+  - Registered Agent Last Name: x.name.last
+    show if:
+       variable: x.question
+       is: False
+  - Registered Agent Suffix: x.name.suffix
+    show if:
+       variable: x.question
+       is: False
+    required: False
+    code: |
+      name_suffix()
+  - Address: x.address.address
+  - City: x.address.city
+  - State: x.address.state
+    default: 
+      code: |
+        case.state
+    code: |
+      us.states.mapping('abbr', 'name')
+  - Zip: x.address.zip
+    required: False
+---
+generic list object: Individual
+question: |
+  What is ${ (ordinal(i) + " predecessors, owners, officers, directors, and control person") }'s name?
+fields:
+  - Somebody already mentioned: x.child[i]
+    datatype: object
+    disable others: True
+    choices: case.all_known_people()
+    exclude:
+      - x
+      - x.child
+  - First Name: x.child[i].name.first
+  - Middle Name: x.child[i].name.middle
+    required: False
+  - Last Name: x.child[i].name.last
+  - Suffix: x.child[i].name.suffix
+    required: False
+    code: |
+      name_suffix()
+  - contactType: x.child[i].contactType
+    code: |
+      ["predecessor", "owner", "officer", "directors", "control persons"]
+  - "Ownership percentage": x.child[i].percentage
+    show if: 
+       variable: x.child[i].contactType
+       is: "owner"
+    datatype: range
+    min: 0
+    max: 100
+    step: 1.0
+---
+generic object: Individual
+question: |
+  Do you have any members or managers?
+yesno: x.child.there_are_any
+decoration: children
+---
+generic object: Individual
+question: |
+  So far, you have told me about
+  ${ (x.child.number_as_word()) } person
+  ${ x.child }.
+  Do you have any other members or managers?
+yesno: x.child.there_is_another
+decoration: children
+---
+generic list object: Individual
+question: |
+  What is ${ x.possessive(ordinal(i) + " member or manager") }'s name?
+fields:
+  - Somebody already mentioned: x.child[i]
+    datatype: object
+    disable others: True
+    choices: case.all_known_people()
+    exclude:
+      - x
+      - x.child
+  - First Name: x.child[i].name.first
+  - Middle Name: x.child[i].name.middle
+    required: False
+  - Last Name: x.child[i].name.last
+    default: ${ x.name.last }
+  - Suffix: x.child[i].name.suffix
+    required: False
+    code: |
+      name_suffix()
+  - Address: x.child[i].address.address
+  - City: x.child[i].address.city
+  - State: x.child[i].address.state
+    default: 
+      code: |
+        case.state
+    code: |
+      us.states.mapping('abbr', 'name')
+  - Zip: x.child[i].address.zip
+    required: False
+---
+generic list object: Individual
+question: |
+  Provide Supplemental Provisions/Information 
+fields:
+  - "Attach PDF file?": quest_pdf
+    datatype: yesnoradio
+  - Supplemental Provisions/Information : supplemental_provisions
+    datatype: area
+    default: ""
+  - PDF: supplemental_provisions_pdf
+    datatype: file
+    show if:
+       variable: quest_pdf
+       is: True

@@ -1,0 +1,137 @@
+---
+include:
+  - basic-questions.yml
+---
+mandatory: True
+question: |
+  All documentation complete.
+buttons:
+  - Finished: leave
+    url: https://www.gooddocs.io
+  - Start Over: restart
+attachments:
+  - name: Disclosure Statement
+    filename: ${ organizer.name }_LLC_Packet
+    content file: 
+      #- LLCPacket.md
+      #- CertificateofFormation.md
+       - EIN.md
+      #- AcceptanceofAppt.md
+      #- Minutes.md
+      # - UnanimousConsent.md
+---
+objects:
+  - entity: Individual
+  - agent: Person
+  - officers : Individual
+  - organizer : Individual
+  - members: Person
+mandatory: True
+---
+generic object: Individual
+question: |
+  What is the legal name of the entity (or individual) for whom the EIN is being
+  requested?
+  Each Company must have a primary organizer. What is ${ x.object_possessive('name')}?
+fields:
+  - First Name: x.name.first
+    default: ${ x.first_name_hint() }
+  - Middle Name: x.name.middle
+    required: False
+  - Last Name: x.name.last
+    default: ${ x.last_name_hint() }
+  - Suffix: x.name.suffix
+    required: False
+    code: |
+      name_suffix()
+  - Title in Company: x.title
+  - Address: x.address.address
+  - City: x.address.city
+  - State: x.address.state
+    default: 
+      code: |
+        case.state
+    code: |
+      us.states.mapping('abbr', 'name')
+  - Zip: x.address.zip
+    required: False
+---
+generic object: Individual
+question: |
+  What is ${ x.object_possessive('information') }?
+subquestion: An issuer is the entity in which investors will be purchasing securities
+fields:
+  - Company Name: x.company
+  - Telephone number: x.tel
+    datatype: integer
+  - E-mail: x.email
+    datatype: email
+  - Address: x.address.address
+  - City: x.address.city
+  - State: x.address.state
+    default: 
+      code: |
+        case.state
+    code: |
+      us.states.mapping('abbr', 'name')
+  - Zip: x.address.zip
+    required: False
+---
+generic object: Individual
+question: |
+  Is the street address same as the mailing address?
+fields:
+  - Street Address: x.mail
+    datatype: yesnoradio
+---
+generic object: Individual
+question: |
+  What is the street address?
+fields:
+  - Address: x.address.address
+  - City: x.address.city
+  - State: x.address.state
+    default: 
+      code: |
+        case.state
+    code: |
+      us.states.mapping('abbr', 'name')
+  - Zip: x.address.zip
+    required: False
+---
+generic object: Individual
+question: |
+  What is the street address?
+fields:
+  - Address: x.address.address
+  - City: x.address.city
+  - State: x.address.state
+    default: 
+      code: |
+        case.state
+    code: |
+      us.states.mapping('abbr', 'name')
+  - Zip: x.address.zip
+    required: False
+---
+generic object: Individual
+question: |
+  What is the county and state where the business is located?
+fields:
+  - County: x.address.county
+  - State: x.address.state
+    default: 
+      code: |
+        case.state
+    code: |
+      us.states.mapping('abbr', 'name')
+---
+generic object: Individual
+question: |
+  What is the name of the responsible party?
+fields:
+  - First Name: x.name.first
+    default: ${ x.first_name_hint() }
+  - Last Name: x.name.last
+    default: ${ x.last_name_hint() }
+   
